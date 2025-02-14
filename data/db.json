@@ -1,0 +1,101 @@
+{
+  "sites": [
+    {
+      "description": "Google Search",
+      "name": "Google4",
+      "url": "https://google.com",
+      "statistics": [
+        {
+          "date": "2024-10-31T19:00:00.000Z",
+          "visits": "2313",
+          "pageviews": "24214"
+        },
+        {
+          "date": "2024-11-10T19:00:00.000Z",
+          "visits": "213",
+          "pageviews": "123"
+        },
+        {
+          "date": "2024-11-23T19:00:00.000Z",
+          "visits": "123",
+          "pageviews": "123"
+        },
+        {
+          "date": "2024-11-24T19:00:00.000Z",
+          "visits": "43",
+          "pageviews": "232"
+        }
+      ],
+      "id": "a8c3"
+    },
+    {
+      "description": "Yandex Site",
+      "name": "Яндекс Mu",
+      "url": "https://yandex.com",
+      "statistics": [
+        {
+          "date": "2024-10-31T19:00:00.000Z",
+          "visits": "434",
+          "pageviews": "2424"
+        },
+        {
+          "date": "2024-11-04T19:00:00.000Z",
+          "visits": "213",
+          "pageviews": "123"
+        },
+        {
+          "date": "2024-11-11T19:00:00.000Z",
+          "visits": "124",
+          "pageviews": "124"
+        },
+        {
+          "date": "2024-11-24T19:00:00.000Z",
+          "visits": "324",
+          "pageviews": "234"
+        }
+      ],
+      "id": "750b"
+    },
+    {
+      "description": "btbrtbtrsbn",
+      "name": "ebrtr",
+      "url": "bgtrbstr.betbt",
+      "statistics": [
+        {
+          "date": "2024-12-02T19:00:00.000Z",
+          "visits": "40",
+          "pageviews": "354"
+        },
+        {
+          "date": "2024-12-25T19:00:00.000Z",
+          "visits": "345",
+          "pageviews": "2442"
+        },
+        {
+          "date": "2024-12-31T19:00:00.000Z",
+          "visits": "99",
+          "pageviews": "533"
+        },
+        {
+          "date": "2025-01-09T19:00:00.000Z",
+          "visits": "43",
+          "pageviews": "38"
+        }
+      ],
+      "id": "578a"
+    },
+    {
+      "id": "3f28",
+      "name": "Qaraqalpaq",
+      "url": "qaraqalpaq.com",
+      "description": "Qaraqalpaqlar haqqinda",
+      "statistics": [
+        {
+          "date": "2025-01-07T19:00:00.000Z",
+          "visits": "34",
+          "pageviews": "456"
+        }
+      ]
+    }
+  ]
+}
