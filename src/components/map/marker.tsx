@@ -8,17 +8,17 @@ export const Marker = ({
   location,
   map,
   places,
+  open
 }: {
   setSelectedPlace: Dispatch<React.SetStateAction<Place | null>>;
   location: { lat: number; lon: number };
   map: mapboxgl.Map;
   places: Place[];
+  open : ()=> void
 }) => {
   const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
   const [loading, setIsloading] = useState<boolean>(false);
-  const [activeMarker, setActiveMarker] = useState<mapboxgl.Marker | null>(
-    null
-  );
+ 
 
   useEffect(() => {
     setIsloading(true);
@@ -34,17 +34,10 @@ export const Marker = ({
 
     places.forEach((place) => {
       const popupContent = `
-        <div style="padding : 10px; border : 1px solid red">
-        <h3>${place.name}</h3>
-        <p>Kategoriya: ${place.category}</p>
-        <p>Rating: ${place.rating}</p>
-        <p>Telefon: ${place.phone}</p>
-        <p>Vebsayt: ${place.website}</p>
-        <p>Manzil: ${place.address}</p>
-        </div>
+        ${place.name.split('_').join(' ').toUpperCase()}
       `;
 
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupContent);
+      const popup = new mapboxgl.Popup({ offset: 25 ,closeButton : false,className: 'marker_active'}).setHTML(popupContent);
 
       const marker = new mapboxgl.Marker()
         .setLngLat([place.lon, place.lat])
@@ -61,14 +54,11 @@ export const Marker = ({
           essential: true,
         });
 
-        if (activeMarker) {
-          activeMarker.getElement().style.transform = "scale(1)";
-        }
-
-        marker.getElement().style.transform = "scale(1.5)";
-        setActiveMarker(marker);
-
+        
+          
+        
         setSelectedPlace(place);
+        open()
       });
     });
 

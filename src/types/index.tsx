@@ -33,3 +33,18 @@ export interface IRoute {
   coordinates: number[][];
   type: string;
 }
+
+export interface SelectedCategory {
+  label: string;
+  value: string;
+}
+export type TransportMode = "driving" | "walking" | "cycling" | "motorcycling";
+export interface State {
+  categories: SelectedCategory[] | [];
+  selectedCategory: SelectedCategory;
+  transportMode: "driving" | "walking" | "cycling" | "motorcycling";
+}
+export type Action =
+  | { type: "SET_CATEGORIES"; payload: SelectedCategory[] }
+  | { type: "SET_CATEGORY"; payload: SelectedCategory }
+  | { type: "SET_TRANSPORT_TYPE"; payload: TransportMode };

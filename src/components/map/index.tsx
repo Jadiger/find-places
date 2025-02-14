@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+
 import { MapBox } from "./mapbox";
 import { useEffect, useState } from "react";
 
@@ -7,8 +7,8 @@ export const MapComponent = () => {
     null
   );
 
-  const { category } = useParams();
-
+  
+const category = null
   console.log(category);
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -30,7 +30,7 @@ export const MapComponent = () => {
     <>
       {location && (
         <div>
-          <MapBox location={location} category={category ? category : ""} />
+          <MapBox location={location}  />
         </div>
       )}
     </>

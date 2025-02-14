@@ -1,10 +1,10 @@
 
 import { Center, Loader } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { Overpass } from "./overpass";
+import {  SetCategory } from "./set-category";
 
 
-export const Categories = () => {
+export const Categories = ({close}:{close : ()=> void}) => {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
@@ -36,7 +36,7 @@ export const Categories = () => {
       )}
       {location && (
         
-          <Overpass lat={location.lat} lng={location.lng} />
+          <SetCategory lat={location.lat} lng={location.lng} close={close}/>
         
       )}
     </>

@@ -15,7 +15,11 @@
     height: 0px;
     width: 0px;
 }
+.marker_active {
+    /* background-color: red; */
 
+    border-radius: 50%;
+}
 
 .custom-drawer .mantine-Drawer-body {
     height: 100%;

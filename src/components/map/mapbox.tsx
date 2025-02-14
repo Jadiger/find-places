@@ -1,34 +1,35 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useState } from "react";
 import mapboxgl from "mapbox-gl";
-// import { SelectedPlaceInfo } from "./selected-place-info";
-// import { useDisclosure } from "@mantine/hooks";
+import { SelectedPlaceInfo } from "./selected-place-info";
+import { useDisclosure } from "@mantine/hooks";
 import { Marker } from "./marker";
-import { IOverPassData, IRoute, Place } from "../../types";
+import { IOverPassData, Place } from "../../types";
 import { notifications } from "@mantine/notifications";
-
+import { useCategory } from "../../context-reducer/context";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiamFkaWdlciIsImEiOiJjbTZ6ZnB1M3cwNDFtMmlwZjFqZ2gzOWMwIn0.8XL2yGrchdup7gv3EeVkAg";
 
-interface MapProps {
+export const MapBox = ({
+  location,
+}: {
   location: { lat: number; lon: number };
-  category?: string;
-}
-
-export const MapBox = ({ location, category }: MapProps) => {
-  // const [opened, { open, close }] = useDisclosure(false);
+}) => {
+  const [opened, { open, close }] = useDisclosure(false);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const [places, setPlaces] = useState<Place[] | []>([]);
 
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [transportMode, setTransportMode] = useState<
-    "driving" | "walking" | "cycling" | "motorcycling"
-  >("walking");
+
   const [travelTime, setTravelTime] = useState<string | null>(null);
-  const [route, setRoute] = useState<IRoute | null>(null);
-  console.log(route);
-console.log(route);
+  const { state } = useCategory();
+  const category = state.selectedCategory.value;
+  
+  
+  
+  
+  console.log(selectedPlace);
 
   useEffect(() => {
     const mapInstance = new mapboxgl.Map({
@@ -52,9 +53,13 @@ console.log(route);
   }, [location, category]);
 
   const fetchPlaces = async (categoryFilter?: string) => {
-    const query = `[out:json];node(around:5000,${location.lat},${
+    const query = `[out:json];node(around:2000,${location.lat},${
       location.lon
-    })${categoryFilter ? `[amenity=${categoryFilter}]` : `[amenity]`};out;`;
+    })${
+      categoryFilter && categoryFilter !== "all"
+        ? `[amenity=${categoryFilter}]`
+        : `[amenity]`
+    };out;`;
 
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
       query
@@ -62,9 +67,9 @@ console.log(route);
 
     try {
       const response = await fetch(url);
-      const data : IOverPassData = await response.json();
+      const data: IOverPassData = await response.json();
       console.log(data);
-      
+
       const fetchedPlaces = data.elements.map((item) => ({
         id: item.id,
         name: item.tags.name || "Noma'lum joy",
@@ -83,51 +88,63 @@ console.log(route);
     }
   };
   const drawRoute = () => {
-    if (!map || !selectedPlace) return;
+    if (!map || !map.isStyleLoaded() || !selectedPlace) return;
 
-    const url = `https://api.mapbox.com/directions/v5/mapbox/${transportMode}/${location.lon},${location.lat};${selectedPlace.lon},${selectedPlace.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${state.transportMode}/${location.lon},${location.lat};${selectedPlace.lon},${selectedPlace.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+
+    console.log("Route API Call:", url); // ✅ So‘rovni tekshirish
 
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        if (data.routes.length > 0) {
-          const routeLine = data.routes[0].geometry;
-          setRoute(routeLine);
-
-          if (map.getSource("route")) {
-            map.removeLayer("route");
-            map.removeSource("route");
-          }
-
-          map.addSource("route", {
-            type: "geojson",
-            data: {
-              type: "Feature",
-              properties: {},
-              geometry: routeLine,
-            },
+        if (data.routes.length === 0) {
+          notifications.show({
+            title: "Route Not Found",
+            message: "No available routes for the selected transport mode.",
+            color: "yellow",
           });
-
-          map.addLayer({
-            id: "route",
-            type: "line",
-            source: "route",
-            layout: { "line-join": "round", "line-cap": "round" },
-            paint: { "line-color": "#007AFF", "line-width": 5 },
-          });
-
-          const duration = data.routes[0].duration / 60;
-          setTravelTime(`${duration.toFixed(1)} minute`);
+          return;
         }
+
+        const routeLine = data.routes[0].geometry;
+
+        // ✅ Eski marshrutni to‘g‘ri tozalash
+        if (map.getSource("route")) {
+          if (map.getLayer("route")) map.removeLayer("route");
+          map.removeSource("route");
+        }
+
+        map.addSource("route", {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            properties: {},
+            geometry: routeLine,
+          },
+        });
+
+        map.addLayer({
+          id: "route",
+          type: "line",
+          source: "route",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#007AFF", "line-width": 5 },
+        });
+
+        // ✅ Sayohat vaqtini chiqarish
+        const duration = data.routes[0].duration / 60;
+        setTravelTime(`${duration.toFixed(1)} minute`);
       })
-      .catch((err) =>
+      .catch((err) => {
+        console.error("Route Fetch Error:", err);
         notifications.show({
-          title: "Error loading routing type",
+          title: "Error loading route",
           message: err.message,
           color: "red",
-        })
-      );
+        });
+      });
   };
+
 
   return (
     <div
@@ -143,56 +160,23 @@ console.log(route);
           map={map}
           location={location}
           places={places}
+          open={open}
         />
       )}
       <div id="map-container" style={{ height: "100%", width: "100%" }}></div>
 
-      {/* {selectedPlace && (
-        <SelectedPlaceInfo
-          place={selectedPlace}
-          opened={opened}
-          close={close}
-        />
-      )} */}
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: 10,
-          left: 10,
-          zIndex: 1000,
-          background: "white",
-          padding: "10px",
-          borderRadius: "8px",
-          paddingBottom: "60px",
-        }}
-      >
-        <label>Type of transport:</label>
-        <select
-          value={transportMode}
-          onChange={(e) => {
-            drawRoute();
-            setTransportMode(
-              e.target.value as
-                | "driving"
-                | "walking"
-                | "cycling"
-                | "motorcycling"
-            );
-          }}
-        >
-          <option value="walking">🚶 Walking</option>
-          <option value="driving">🚗 Car</option>
-          <option value="cycling">🚴‍♂️ Bicycle</option>
-          <option value="motorcycling">🛵 Bike</option>
-        </select>
-
-        <button onClick={drawRoute} disabled={!selectedPlace}>
-          🚀 Draw Route
-        </button>
-
-        {travelTime && <p>⏳ Arrival Time: {travelTime}</p>}
-      </div>
+      {selectedPlace && (
+        <>
+          <SelectedPlaceInfo
+            drawRoute={drawRoute}
+            place={selectedPlace}
+            opened={opened}
+            close={close}
+            travelTime={travelTime}
+          />
+          
+        </>
+      )}
     </div>
   );
 };
