@@ -164,7 +164,7 @@ console.log(route);
           background: "white",
           padding: "10px",
           borderRadius: "8px",
-          paddingBottom: "env(safe-area-inset-bottom, 20px)",
+          paddingBottom: "60px",
         }}
       >
         <label>Type of transport:</label>
