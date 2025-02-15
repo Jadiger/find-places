@@ -7,6 +7,7 @@ import { MapComponent } from "../components/map";
 
 import { CategoryProvider } from "../context-reducer/context";
 import { Filter } from "../components/filter";
+import { Categories } from "../components/categories";
 
 export default function App() {
   const queryClient = new QueryClient({});
@@ -15,7 +16,7 @@ export default function App() {
     <CategoryProvider>
       <QueryClientProvider client={queryClient}>
         <MantineProvider>
-          <header className="h-16 px-5 shadow-md z-50">
+          <header className="h-16 px-5 shadow-md z-50 relative">
             <Group
               justify="space-between"
               align="center"
@@ -29,6 +30,7 @@ export default function App() {
 
               <Filter />
             </Group>
+            <Categories/>
           </header>
 
           <MapComponent />

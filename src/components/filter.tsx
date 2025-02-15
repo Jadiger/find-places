@@ -1,13 +1,15 @@
 import { Accordion, Button, Drawer, Group, Title } from "@mantine/core";
-import { Categories } from "./categories";
+
 import { IconAdjustments, IconX } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { TranspoertNode } from "./transport-mode";
+
 export const Filter = () => {
   const [opened, { open, close }] = useDisclosure(false);
+
   return (
     <>
-      <Button px="xs"  variant="light" color="#000" onClick={open}>
+      <Button px="xs" variant="light" color="#000" onClick={open}>
         <IconAdjustments size={25} />
       </Button>
       <Drawer
@@ -21,13 +23,9 @@ export const Filter = () => {
           <Title order={4}>Filter</Title> <IconX onClick={close} />
         </Group>
         <Accordion>
-          <Accordion.Item value="categories">
-            <Accordion.Control>Categories</Accordion.Control>
-            <Categories close={close} />
-          </Accordion.Item>
           <Accordion.Item value="transport">
             <Accordion.Control>TransPort Mode</Accordion.Control>
-            <TranspoertNode/>
+            <TranspoertNode />
           </Accordion.Item>
         </Accordion>
       </Drawer>

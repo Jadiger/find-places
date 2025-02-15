@@ -1,4 +1,11 @@
-import { Accordion, Button, Group, Loader } from "@mantine/core";
+import {
+  Button,
+  Center,
+  Grid,
+  Group,
+  Loader,
+ 
+} from "@mantine/core";
 
 import { useOverpass } from "../../queries";
 import { notifications } from "@mantine/notifications";
@@ -37,7 +44,7 @@ export const SetCategory = ({
       [
         ...new Set(
           data?.elements
-            .filter((element) => element.tags.name)
+            // .filter((element) => element.tags.name)
             .map((element) => element.tags.amenity)
         ),
       ].map((category) => ({
@@ -58,39 +65,44 @@ export const SetCategory = ({
   return (
     <>
       {isLoading && (
-        <div style={{ flexGrow: 1 }}>
+        <Center mt={10}>
           <Loader />
-        </div>
+        </Center>
       )}
       {isError && <Button onClick={() => refetch()}>Try Again</Button>}
       {isSuccess && !isLoading && categories && (
-        <>
-          
-              <Accordion.Panel>
-                {[{ label: "All", value: "all" }, ...categories].map(
-                  (category, index) => (
-                    <Group
-                      onClick={() => {
-                        dispatch({ type: "SET_CATEGORY", payload: category });
-                        close();
-                      }}
-                      key={index}
-                      gap={2}
-                      className="border my-2 py-2 px-2 rounded-xl cursor-pointer"
-                      bg={
-                        state.selectedCategory.label === category.label
-                          ? "red"
-                          : "#fff"
-                      }
-                    >
-                      <IconChevronRight />
-                      {category.label}
-                    </Group>
-                  )
-                )}
-              </Accordion.Panel>
-            
-        </>
+        <div className="w-full h-[70vh] overflow-scroll">
+          <Grid className="w-full" gutter={"xs"} pt={10}>
+            {[{ label: "All", value: "all" }, ...categories].map(
+              (category, index) => (
+                <Grid.Col
+                  span={{ base: 6, sm: 4, md: 3, lg: 2, xl: 12 / 7 }}
+                  key={index}
+                  py={0}
+                >
+                  <Group
+                    wrap="nowrap"
+                    align="center"
+                    onClick={() => {
+                      dispatch({ type: "SET_CATEGORY", payload: category });
+                      close()
+                    }}
+                    gap={2}
+                    className="border my-2 p-2 lg:p-3 rounded-md cursor-pointer"
+                    bg={
+                      state.selectedCategory.label === category.label
+                        ? "red"
+                        : "#fff"
+                    }
+                  >
+                    <IconChevronRight />
+                    {category.label}
+                  </Group>
+                </Grid.Col>
+              )
+            )}
+          </Grid>
+        </div>
       )}
     </>
   );

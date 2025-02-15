@@ -7,6 +7,7 @@ import { Marker } from "./marker";
 import { IOverPassData, Place } from "../../types";
 import { notifications } from "@mantine/notifications";
 import { useCategory } from "../../context-reducer/context";
+import { Loader } from "@mantine/core";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiamFkaWdlciIsImEiOiJjbTZ6ZnB1M3cwNDFtMmlwZjFqZ2gzOWMwIn0.8XL2yGrchdup7gv3EeVkAg";
@@ -25,16 +26,13 @@ export const MapBox = ({
   const [travelTime, setTravelTime] = useState<string | null>(null);
   const { state } = useCategory();
   const category = state.selectedCategory.value;
-  
-  
-  
-  
-  console.log(selectedPlace);
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const mapInstance = new mapboxgl.Map({
       container: "map-container",
-      style: "mapbox://styles/mapbox/light-v11",
+      style: "mapbox://styles/jadiger/cm76dbf2x01vp01qx4kgvawoj",
       center: [location.lon, location.lat],
       zoom: 13,
     });
@@ -53,6 +51,7 @@ export const MapBox = ({
   }, [location, category]);
 
   const fetchPlaces = async (categoryFilter?: string) => {
+    setLoading(true);
     const query = `[out:json];node(around:2000,${location.lat},${
       location.lon
     })${
@@ -72,7 +71,7 @@ export const MapBox = ({
 
       const fetchedPlaces = data.elements.map((item) => ({
         id: item.id,
-        name: item.tags.name || "Noma'lum joy",
+        name: item.tags.name || "Belgisiz",
         lat: item.lat,
         lon: item.lon,
         category: item.tags.amenity || "unknown",
@@ -83,16 +82,24 @@ export const MapBox = ({
       }));
 
       setPlaces(fetchedPlaces);
-    } catch (error) {
-      console.error("Ma'lumotlarni yuklashda xatolik:", error);
+      // @ts-expect-error
+    } catch (error: { message: string }) {
+    
+
+      notifications.show({
+        title: "Error",
+        message: error.message,
+        color: "red",
+      });
+    } finally {
+       setLoading(false);
     }
+   
   };
   const drawRoute = () => {
     if (!map || !map.isStyleLoaded() || !selectedPlace) return;
 
     const url = `https://api.mapbox.com/directions/v5/mapbox/${state.transportMode}/${location.lon},${location.lat};${selectedPlace.lon},${selectedPlace.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
-
-    console.log("Route API Call:", url); // ✅ So‘rovni tekshirish
 
     fetch(url)
       .then((res) => res.json())
@@ -108,7 +115,6 @@ export const MapBox = ({
 
         const routeLine = data.routes[0].geometry;
 
-        // ✅ Eski marshrutni to‘g‘ri tozalash
         if (map.getSource("route")) {
           if (map.getLayer("route")) map.removeLayer("route");
           map.removeSource("route");
@@ -131,12 +137,10 @@ export const MapBox = ({
           paint: { "line-color": "#007AFF", "line-width": 5 },
         });
 
-        // ✅ Sayohat vaqtini chiqarish
         const duration = data.routes[0].duration / 60;
         setTravelTime(`${duration.toFixed(1)} minute`);
       })
       .catch((err) => {
-        console.error("Route Fetch Error:", err);
         notifications.show({
           title: "Error loading route",
           message: err.message,
@@ -144,7 +148,7 @@ export const MapBox = ({
         });
       });
   };
-
+console.log(map);
 
   return (
     <div
@@ -174,8 +178,12 @@ export const MapBox = ({
             close={close}
             travelTime={travelTime}
           />
-          
         </>
+      )}
+      {loading && (
+        <div className="absolute top-0 left-0 flex justify-center items-center bg-gray-300 w-full h-full">
+          <Loader />
+        </div>
       )}
     </div>
   );
