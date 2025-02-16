@@ -6,7 +6,7 @@ import { IconMapPinSearch } from "@tabler/icons-react";
 import { MapComponent } from "../components/map";
 
 import { CategoryProvider } from "../context-reducer/context";
-import { Filter } from "../components/filter";
+import { Setting } from "../components/setting";
 import { Categories } from "../components/categories";
 
 export default function App() {
@@ -28,7 +28,7 @@ export default function App() {
                 <h2 className="text-2xl font-semibold">Find Places</h2>
               </Group>
 
-              <Filter />
+              <Setting />
             </Group>
             <Categories/>
           </header>

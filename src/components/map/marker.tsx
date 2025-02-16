@@ -2,6 +2,7 @@ import React, { Dispatch, useEffect, useState } from "react";
 import { Place } from "../../types";
 import mapboxgl from "mapbox-gl";
 import { Loader } from "@mantine/core";
+import { useCategory } from "../../context-reducer/context";
 
 export const Marker = ({
   setSelectedPlace,
@@ -16,14 +17,15 @@ export const Marker = ({
   places: Place[];
   open: () => void;
 }) => {
+
   const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
   const [loading, setIsloading] = useState<boolean>(false);
-  // 🟢 Kategoriya bo‘yicha mos ikonlarni aniqlash funksiyasi
+  const { state,dispatch } = useCategory();
+
   const getIcon = (category: string) => {
     const icons: Record<string, string> = {
       restaurant: "/icons/restaurant.png",
       cafe: "/icons/cafe.png",
-      hospital: "https://cdn-icons-png.flaticon.com/128/3176/3176363.png",
       school: "/icons/school.png",
       shop: "/icons/shop.png",
       default: "/icons/placeholder.png",
@@ -36,7 +38,6 @@ export const Marker = ({
     markers.forEach((marker) => marker.remove());
     const newMarkers: mapboxgl.Marker[] = [];
 
-    // 🟢 Foydalanuvchi lokatsiyasi (qizil marker)
     const userMarker = new mapboxgl.Marker({ color: "red" })
       .setLngLat([location.lon, location.lat])
       .setPopup(new mapboxgl.Popup().setText("Your Location"))
@@ -44,10 +45,11 @@ export const Marker = ({
 
     newMarkers.push(userMarker);
 
-    // 🟢 Har bir joy uchun mos ikonni o‘rnatish
     places.forEach((place) => {
       const popupContent = `
-        ${place.name.split("_").join(" ").toUpperCase()}
+        ${
+          place.name ? place.name.split("_").join(" ").toUpperCase() : "No Name"
+        }
       `;
 
       const popup = new mapboxgl.Popup({
@@ -56,14 +58,12 @@ export const Marker = ({
         className: "marker_active",
       }).setHTML(popupContent);
 
-      // 🟢 Yangi marker element yaratish
       const icon = document.createElement("img");
       icon.src = getIcon(place.category);
       icon.style.width = "25px";
       icon.style.height = "25px";
       icon.style.cursor = "pointer";
 
-      // 🟢 Marker qo‘shish
       const marker = new mapboxgl.Marker({ element: icon })
         .setLngLat([place.lon, place.lat])
         .setPopup(popup)
@@ -72,11 +72,11 @@ export const Marker = ({
       newMarkers.push(marker);
       setIsloading(false);
 
-      // 🟢 Marker bosilganda xaritani joyga olib borish
       marker.getElement().addEventListener("click", () => {
+        dispatch({type: 'SET_ZOOM', payload : 18})
         map.flyTo({
           center: [place.lon, place.lat],
-          zoom: 18,
+          zoom: state.zoom,
           essential: true,
         });
 
@@ -86,7 +86,7 @@ export const Marker = ({
     });
 
     setMarkers(newMarkers);
-  }, [map, places]);
+  }, [map, places, state.transportMode]);
 
   return (
     <>

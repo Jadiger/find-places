@@ -16,6 +16,8 @@ interface ITags {
   phone: string;
   website: string;
   address: string;
+
+  opening_hours?: string;
 }
 
 export interface Place {
@@ -28,6 +30,7 @@ export interface Place {
   phone?: string;
   website?: string;
   address?: string;
+  opening_hours?: string;
 }
 export interface IRoute {
   coordinates: number[][];
@@ -38,13 +41,18 @@ export interface SelectedCategory {
   label: string;
   value: string;
 }
-export type TransportMode = "driving" | "walking" | "cycling" | "motorcycling";
+export type TransportMode = string;
+
 export interface State {
   categories: SelectedCategory[] | [];
   selectedCategory: SelectedCategory;
-  transportMode: "driving" | "walking" | "cycling" | "motorcycling";
+  transportMode: string;
+  radius: number;
+  zoom: number;
 }
 export type Action =
   | { type: "SET_CATEGORIES"; payload: SelectedCategory[] }
   | { type: "SET_CATEGORY"; payload: SelectedCategory }
-  | { type: "SET_TRANSPORT_TYPE"; payload: TransportMode };
+  | { type: "SET_TRANSPORT_TYPE"; payload: TransportMode }
+  | { type: "SET_RADIUS"; payload: number }
+  | { type: "SET_ZOOM"; payload: number };

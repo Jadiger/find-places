@@ -7,7 +7,8 @@ import { Marker } from "./marker";
 import { IOverPassData, Place } from "../../types";
 import { notifications } from "@mantine/notifications";
 import { useCategory } from "../../context-reducer/context";
-import { Loader } from "@mantine/core";
+import { ActionIcon, Loader, Stack } from "@mantine/core";
+import { IconLocation, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiamFkaWdlciIsImEiOiJjbTZ6ZnB1M3cwNDFtMmlwZjFqZ2gzOWMwIn0.8XL2yGrchdup7gv3EeVkAg";
@@ -24,7 +25,7 @@ export const MapBox = ({
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
 
   const [travelTime, setTravelTime] = useState<string | null>(null);
-  const { state } = useCategory();
+  const { state, dispatch } = useCategory();
   const category = state.selectedCategory.value;
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -34,7 +35,7 @@ export const MapBox = ({
       container: "map-container",
       style: "mapbox://styles/jadiger/cm76dbf2x01vp01qx4kgvawoj",
       center: [location.lon, location.lat],
-      zoom: 13,
+      zoom: state.zoom,
     });
 
     setMap(mapInstance);
@@ -48,11 +49,11 @@ export const MapBox = ({
         mapInstance.remove();
       }
     };
-  }, [location, category]);
+  }, [location, category, state.radius]);
 
   const fetchPlaces = async (categoryFilter?: string) => {
     setLoading(true);
-    const query = `[out:json];node(around:2000,${location.lat},${
+    const query = `[out:json];node(around:${state.radius},${location.lat},${
       location.lon
     })${
       categoryFilter && categoryFilter !== "all"
@@ -67,34 +68,36 @@ export const MapBox = ({
     try {
       const response = await fetch(url);
       const data: IOverPassData = await response.json();
-      console.log(data);
+      console.log(data.elements);
 
       const fetchedPlaces = data.elements.map((item) => ({
         id: item.id,
-        name: item.tags.name || "Belgisiz",
+        name: item.tags.name,
         lat: item.lat,
         lon: item.lon,
-        category: item.tags.amenity || "unknown",
-        rating: item.tags.rating || "N/A",
-        phone: item.tags.phone || "N/A",
-        website: item.tags.website || "N/A",
-        address: item.tags.address || "N/A",
+        category: item.tags.amenity,
+        rating: item.tags.rating,
+        phone: item.tags.phone,
+        website: item.tags.website,
+        address: item.tags.address,
+        opening_hours: item.tags.opening_hours,
       }));
 
       setPlaces(fetchedPlaces);
-      // @ts-expect-error
-    } catch (error: { message: string }) {
-    
+    } catch (error: unknown) {
+      let errorMessage = "Unknown Error";
 
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       notifications.show({
         title: "Error",
-        message: error.message,
+        message: errorMessage,
         color: "red",
       });
     } finally {
-       setLoading(false);
+      setLoading(false);
     }
-   
   };
   const drawRoute = () => {
     if (!map || !map.isStyleLoaded() || !selectedPlace) return;
@@ -148,7 +151,6 @@ export const MapBox = ({
         });
       });
   };
-console.log(map);
 
   return (
     <div
@@ -158,6 +160,51 @@ console.log(map);
         position: "relative",
       }}
     >
+      <Stack className="absolute top-5 right-5 z-50">
+        <ActionIcon
+          size={35}
+          p={5}
+          variant="light"
+          radius="md"
+          disabled={state.zoom > 20}
+          onClick={() => {
+            dispatch({ type: "SET_ZOOM", payload: state.zoom + 1 });
+            map?.flyTo({ zoom: state.zoom });
+          }}
+        >
+          <IconZoomIn />
+        </ActionIcon>
+        <ActionIcon
+          size={35}
+          disabled={state.zoom < 5}
+          p={5}
+          variant="light"
+          radius="md"
+          onClick={() => {
+            dispatch({ type: "SET_ZOOM", payload: state.zoom - 1 });
+            map?.flyTo({ zoom: state.zoom });
+            console.log(state.zoom);
+          }}
+        >
+          <IconZoomOut />
+        </ActionIcon>
+        <ActionIcon
+          size={35}
+          p={5}
+          variant="light"
+          radius="md"
+          onClick={() => {
+            dispatch({ type: "SET_ZOOM", payload: 18 });
+            map?.flyTo({
+              center: [location.lon, location.lat],
+              zoom: state.zoom,
+              essential: true,
+            });
+          }}
+        >
+          <IconLocation size={20} />
+        </ActionIcon>
+      </Stack>
       {map && (
         <Marker
           setSelectedPlace={setSelectedPlace}
@@ -169,7 +216,7 @@ console.log(map);
       )}
       <div id="map-container" style={{ height: "100%", width: "100%" }}></div>
 
-      {selectedPlace && (
+      {selectedPlace && map && (
         <>
           <SelectedPlaceInfo
             drawRoute={drawRoute}
@@ -177,6 +224,8 @@ console.log(map);
             opened={opened}
             close={close}
             travelTime={travelTime}
+            location={location}
+            map={map}
           />
         </>
       )}

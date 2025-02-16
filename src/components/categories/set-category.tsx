@@ -1,11 +1,4 @@
-import {
-  Button,
-  Center,
-  Grid,
-  Group,
-  Loader,
- 
-} from "@mantine/core";
+import { Button, Center, Grid, Group, Loader } from "@mantine/core";
 
 import { useOverpass } from "../../queries";
 import { notifications } from "@mantine/notifications";
@@ -22,13 +15,13 @@ export const SetCategory = ({
   lng: number;
   close: () => void;
 }) => {
+  const { state, dispatch } = useCategory();
   const { data, isSuccess, isError, isLoading, refetch, error } = useOverpass({
     lat,
     lng,
+    radius: state.radius,
   });
-  console.log(data);
-  const { state, dispatch } = useCategory();
-  console.log(state);
+ 
 
   if (isError) {
     notifications.show({
@@ -44,7 +37,6 @@ export const SetCategory = ({
       [
         ...new Set(
           data?.elements
-            // .filter((element) => element.tags.name)
             .map((element) => element.tags.amenity)
         ),
       ].map((category) => ({
@@ -60,7 +52,7 @@ export const SetCategory = ({
     if (isSuccess && categories.length > 0) {
       dispatch({ type: "SET_CATEGORIES", payload: categories });
     }
-  }, [isSuccess, categories, dispatch]);
+  }, [isSuccess, categories, dispatch,state.radius]);
 
   return (
     <>
@@ -71,38 +63,44 @@ export const SetCategory = ({
       )}
       {isError && <Button onClick={() => refetch()}>Try Again</Button>}
       {isSuccess && !isLoading && categories && (
-        <div className="w-full h-[70vh] overflow-scroll">
-          <Grid className="w-full" gutter={"xs"} pt={10}>
-            {[{ label: "All", value: "all" }, ...categories].map(
-              (category, index) => (
-                <Grid.Col
-                  span={{ base: 6, sm: 4, md: 3, lg: 2, xl: 12 / 7 }}
-                  key={index}
-                  py={0}
-                >
-                  <Group
-                    wrap="nowrap"
-                    align="center"
-                    onClick={() => {
-                      dispatch({ type: "SET_CATEGORY", payload: category });
-                      close()
-                    }}
-                    gap={2}
-                    className="border my-2 p-2 lg:p-3 rounded-md cursor-pointer"
-                    bg={
-                      state.selectedCategory.label === category.label
-                        ? "red"
-                        : "#fff"
-                    }
+        <>
+          <div className="h-5"></div>
+          <div className="w-full h-[70vh] overflow-scroll">
+            <Grid
+              className="w-full bg-slate-100 border rounded-md p-3"
+              gutter={"xs"}
+            >
+              {[{ label: "All", value: "all" }, ...categories].map(
+                (category, index) => (
+                  <Grid.Col
+                    span={{ base: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
+                    key={index}
+                    py={0}
                   >
-                    <IconChevronRight />
-                    {category.label}
-                  </Group>
-                </Grid.Col>
-              )
-            )}
-          </Grid>
-        </div>
+                    <Group
+                      wrap="nowrap"
+                      align="center"
+                      onClick={() => {
+                        dispatch({ type: "SET_CATEGORY", payload: category });
+                        close();
+                      }}
+                      gap={2}
+                      className="border my-2 p-2 lg:p-3 rounded-md cursor-pointer"
+                      bg={
+                        state.selectedCategory.label === category.label
+                          ? "#cbcece"
+                          : "#fff"
+                      }
+                    >
+                      <IconChevronRight />
+                      {category.label}
+                    </Group>
+                  </Grid.Col>
+                )
+              )}
+            </Grid>
+          </div>
+        </>
       )}
     </>
   );
