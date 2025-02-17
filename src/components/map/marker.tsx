@@ -88,7 +88,7 @@ export const Marker = ({
     setIsloading(false);
 
     setMarkers(newMarkers);
-  }, [map, places, state.transportMode,state.radius]);
+  }, [map, places, state.transportMode]);
 console.log(state.selectedPlace);
 
   return (

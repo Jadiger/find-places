@@ -10,7 +10,6 @@ import { useCategory } from "../../context-reducer/context";
 import { ActionIcon, Loader, Stack } from "@mantine/core";
 import { IconLocation, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 import { ClickedPlace } from "../clicked-place/clicked-place";
-import { ViewPortRadius } from "../viewport-radius/viewport-radius";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiamFkaWdlciIsImEiOiJjbTZ6ZnB1M3cwNDFtMmlwZjFqZ2gzOWMwIn0.8XL2yGrchdup7gv3EeVkAg";
@@ -51,7 +50,7 @@ export const MapBox = ({
         mapInstance.remove();
       }
     };
-  }, [location, category]);
+  }, [location, category, state.radius]);
 
   const fetchPlaces = async (categoryFilter?: string) => {
     if (!category) {
@@ -160,7 +159,6 @@ export const MapBox = ({
       {map && (
         <Marker map={map} location={location} places={places} open={open} />
       )}
-      {map && <ViewPortRadius map={map} />}
 
       {state.selectedPlace && map && (
         <>
