@@ -30,6 +30,7 @@ export const SelectedPlaceInfo = ({
 }) => {
   const { state, dispatch } = useCategory();
   const [travelTime, setTravelTime] = useState<string | null>(null);
+
   if (!state.selectedPlace) {
     return;
   }
@@ -61,6 +62,7 @@ export const SelectedPlaceInfo = ({
     state.selectedPlace.lat,
     state.selectedPlace.lon
   );
+  console.log(travelTime);
 
   return (
     <>
@@ -72,7 +74,6 @@ export const SelectedPlaceInfo = ({
               variant="filled"
               color="red"
               onClick={() => {
-
                 if (map.getSource("route")) {
                   if (map.getLayer("route")) {
                     map.removeLayer("route");
@@ -93,19 +94,13 @@ export const SelectedPlaceInfo = ({
           </Stack>
         )}
         {opened && (
-          <Stack
-            gap={10}
-            className="bg-white p-4 mb-5 rounded-md relative"
-            style={{ overflow: opened ? "auto" : "hidden" }}
-            w={opened ? "100%" : "auto"}
-            // className="overflow-hidden"
-          >
+          <Stack gap={10} className="bg-white p-4 mb-5 rounded-md relative">
             {travelTime && (
               <Group
                 justify="space-between"
                 wrap="nowrap"
                 bg="white"
-                className="absolute w-full top-0 left-0 rounded-md py-3 px-5"
+                className="absolute w-full top-0 left-0 rounded-md py-3 px-5 z-50"
                 style={{ transform: "translateY(calc(-100% - 20px))" }}
               >
                 <p>Arrivial Time : </p>
