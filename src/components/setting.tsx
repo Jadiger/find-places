@@ -30,11 +30,7 @@ export const Setting = () => {
     {
       label: "Cycling",
       value: "cycling",
-    },
-    {
-      label: "Motorcycling",
-      value: "motorcycling",
-    },
+    }
   ];
   const [data, setData] = useState<{ transportMode: string; radius: number }>({
     transportMode: state.transportMode,
