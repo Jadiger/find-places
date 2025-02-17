@@ -64,7 +64,10 @@ export const SelectedPlaceInfo = ({
 
   return (
     <>
-      <div className="h-auto w-full sm:w-96  z-50 absolute bottom-[env(safe-area-inset-bottom)]  left-0 p-5 py-6">
+      <div
+        className="h-auto w-full sm:w-96 z-50 absolute bottom-0 left-0 p-5 py-6"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 20px)" }}
+      >
         {!opened && (
           <Stack>
             <ActionIcon
@@ -76,7 +79,6 @@ export const SelectedPlaceInfo = ({
 
                 if (map.getSource("route")) {
                   if (map.getLayer("route")) {
-                    console.log("🗑️ Marshrut xaritadan o‘chirildi!");
                     map.removeLayer("route");
                   }
                   map.removeSource("route");
