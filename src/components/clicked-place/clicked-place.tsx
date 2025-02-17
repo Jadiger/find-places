@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { notifications } from "@mantine/notifications";
 import mapboxgl from "mapbox-gl";
 import { useCategory } from "../../context-reducer/context";
+
 export const ClickedPlace = ({
   map,
   open,
@@ -10,11 +11,12 @@ export const ClickedPlace = ({
   open: () => void;
 }) => {
   const { dispatch } = useCategory();
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
     if (!map) return;
 
-    map.on("click", async (e) => {
+    const onClick = async (e: mapboxgl.MapMouseEvent & mapboxgl.MapEvent) => {
       const { lng, lat } = e.lngLat;
 
       const url = `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/${lng},${lat}.json?radius=50&limit=1&layers=poi_label&access_token=${mapboxgl.accessToken}`;
@@ -22,18 +24,34 @@ export const ClickedPlace = ({
       try {
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data);
+        console.log("TileQuery Response:", data);
 
         if (data.features.length > 0) {
           const place = data.features[0];
-          const placeName = place.properties.name;
+          const placeName = place.properties.name || "Unknown Place";
           const category = place.properties.maki
             ? String(place.properties.maki)
                 .split("_")
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(" ")
-            : place.properties.maki;
+            : "Other";
+          if (markerRef.current) {
+            markerRef.current.remove();
+            markerRef.current = null;
+          }
+          const icon = document.createElement("div");
+          icon.style.width = "35px";
+          icon.style.height = "35px";
+          icon.style.cursor = "pointer";
+          icon.style.borderRadius = '50%'
+          icon.style.border = "2px solid red"
 
+          const newMarker = new mapboxgl.Marker({ element: icon })
+            .setLngLat([lng, lat])
+            .setPopup(new mapboxgl.Popup().setText(placeName))
+            .addTo(map);
+
+          markerRef.current = newMarker;
           dispatch({
             type: "SET_SELECTED_PLACE",
             payload: {
@@ -49,11 +67,11 @@ export const ClickedPlace = ({
               opening_hours: undefined,
             },
           });
+
           open();
         }
       } catch (error: unknown) {
         let errorMessage = "Unknown Error";
-
         if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -63,14 +81,17 @@ export const ClickedPlace = ({
           color: "red",
         });
       }
-    });
+    };
+
+    map.on("click", onClick);
 
     return () => {
-      if (map) {
-        map.off("click", () => {});
+      map.off("click", onClick);
+      if (markerRef.current) {
+        markerRef.current.remove();
       }
     };
-  }, [map]);
+  }, [map, dispatch]);
 
-  return null
+  return null;
 };

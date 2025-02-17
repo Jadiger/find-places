@@ -66,7 +66,7 @@ export const SetCategory = ({
           {isSuccess && !isLoading && categories && (
             <>
               <div className="h-5"></div>
-              <div className="w-full md:w-96 h-[70vh] overflow-scroll">
+              <div className="w-full md:w-96 h-[70vh] overflow-scroll z-50">
                 <Stack
                   className="w-full bg-slate-100 border rounded-lg p-3"
                   gap={10}

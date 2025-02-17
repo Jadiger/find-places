@@ -54,7 +54,6 @@ export const MapBox = ({
 
   const fetchPlaces = async (categoryFilter?: string) => {
     if (!category) {
-      // setLoading(false)
       return;
     }
     if (categoryFilter === "all") {
@@ -71,7 +70,6 @@ export const MapBox = ({
     try {
       const response = await fetch(url);
       const data: IOverPassData = await response.json();
-      console.log(data.elements);
 
       const fetchedPlaces = data.elements.map((item) => ({
         id: item.id,

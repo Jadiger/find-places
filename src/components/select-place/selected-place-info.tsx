@@ -66,7 +66,7 @@ export const SelectedPlaceInfo = ({
 
   return (
     <>
-      <div className="h-auto w-full sm:w-96 z-50 absolute bottom-0 left-0 p-5 pt-6 pb-20">
+      <div className="h-auto w-full sm:w-96 z-40 absolute bottom-0 left-0 p-5 pt-6 pb-20">
         {!opened && (
           <Stack>
             <ActionIcon
