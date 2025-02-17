@@ -19,7 +19,7 @@ export const ClickedPlace = ({
     const onClick = async (e: mapboxgl.MapMouseEvent & mapboxgl.MapEvent) => {
       const { lng, lat } = e.lngLat;
 
-      const url = `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/${lng},${lat}.json?radius=50&limit=1&layers=poi_label&access_token=${mapboxgl.accessToken}`;
+      const url = `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/${lng},${lat}.json?radius=10&limit=1&layers=poi_label&access_token=${mapboxgl.accessToken}`;
 
       try {
         const response = await fetch(url);
