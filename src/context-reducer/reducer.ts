@@ -2,10 +2,11 @@ import { Action, State } from "../types";
 
 export const initialState: State = {
   categories: [],
-  selectedCategory: { label: "All", value: "all" },
+  selectedCategory: {label : 'All', value : 'all'},
   transportMode: "walking",
   radius: 3000,
-  zoom : 13
+  zoom : 13,
+  selectedPlace : null
 };
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -19,6 +20,8 @@ export function reducer(state: State, action: Action): State {
       return { ...state, transportMode : action.payload}
     case 'SET_ZOOM' :
       return {...state, zoom : action.payload}
+    case 'SET_SELECTED_PLACE' :
+      return {...state, selectedPlace : action.payload}
     default:
       return state;
   }

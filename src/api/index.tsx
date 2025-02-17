@@ -1,4 +1,4 @@
-import { http } from "../constatnts/axiosIntance";
+import { http } from "../constants/axiosIntance";
 import { IOverPassData } from "../types";
 
 export const api = {

@@ -1,26 +1,25 @@
-import React, { Dispatch, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { Place } from "../../types";
 import mapboxgl from "mapbox-gl";
 import { Loader } from "@mantine/core";
 import { useCategory } from "../../context-reducer/context";
 
 export const Marker = ({
-  setSelectedPlace,
+  
   location,
   map,
   places,
   open,
 }: {
-  setSelectedPlace: Dispatch<React.SetStateAction<Place | null>>;
+ 
   location: { lat: number; lon: number };
   map: mapboxgl.Map;
-  places: Place[];
+  places: Place[] ;
   open: () => void;
 }) => {
-
   const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
   const [loading, setIsloading] = useState<boolean>(false);
-  const { state,dispatch } = useCategory();
+  const { state, dispatch } = useCategory();
 
   const getIcon = (category: string) => {
     const icons: Record<string, string> = {
@@ -45,48 +44,52 @@ export const Marker = ({
 
     newMarkers.push(userMarker);
 
-    places.forEach((place) => {
-      const popupContent = `
+    if (places.length > 0 && state.selectedCategory.value !== 'all') {
+      places.forEach((place) => {
+        const popupContent = `
         ${
           place.name ? place.name.split("_").join(" ").toUpperCase() : "No Name"
         }
       `;
 
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: false,
-        className: "marker_active",
-      }).setHTML(popupContent);
+        const popup = new mapboxgl.Popup({
+          offset: 25,
+          closeButton: false,
+          className: "marker_active",
+        }).setHTML(popupContent);
 
-      const icon = document.createElement("img");
-      icon.src = getIcon(place.category);
-      icon.style.width = "25px";
-      icon.style.height = "25px";
-      icon.style.cursor = "pointer";
+        const icon = document.createElement("img");
+        icon.src = getIcon(place.category);
+        icon.style.width = "25px";
+        icon.style.height = "25px";
+        icon.style.cursor = "pointer";
 
-      const marker = new mapboxgl.Marker({ element: icon })
-        .setLngLat([place.lon, place.lat])
-        .setPopup(popup)
-        .addTo(map);
+        const marker = new mapboxgl.Marker({ element: icon })
+          .setLngLat([place.lon, place.lat])
+          .setPopup(popup)
+          .addTo(map);
 
-      newMarkers.push(marker);
-      setIsloading(false);
+        newMarkers.push(marker);
+        setIsloading(false);
 
-      marker.getElement().addEventListener("click", () => {
-        dispatch({type: 'SET_ZOOM', payload : 18})
-        map.flyTo({
-          center: [place.lon, place.lat],
-          zoom: state.zoom,
-          essential: true,
+        marker.getElement().addEventListener("click", () => {
+          dispatch({ type: "SET_ZOOM", payload: 18 });
+          map.flyTo({
+            center: [place.lon, place.lat],
+            zoom: state.zoom,
+            essential: true,
+          });
+
+          dispatch({type : 'SET_SELECTED_PLACE', payload : place})
+          open();
         });
-
-        setSelectedPlace(place);
-        open();
       });
-    });
+    }
+    setIsloading(false);
 
     setMarkers(newMarkers);
-  }, [map, places, state.transportMode]);
+  }, [map, places, state.transportMode,state.radius]);
+console.log(state.selectedPlace);
 
   return (
     <>

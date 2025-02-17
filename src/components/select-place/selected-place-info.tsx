@@ -6,36 +6,41 @@ import {
   Group,
   Stack,
 } from "@mantine/core";
-import { Place } from "../../types";
-import { IconX } from "@tabler/icons-react";
+
+import {  IconInfoCircle, IconRefresh, IconX } from "@tabler/icons-react";
+import { useCategory } from "../../context-reducer/context";
+import { drawRoute } from "./draw-route";
+import { useState } from "react";
 
 export const SelectedPlaceInfo = ({
-  place,
   opened,
+  open,
   close,
-  drawRoute,
-  travelTime,
   location,
   map,
 }: {
-  place: Place;
   opened: boolean;
+  open: () => void;
   close: () => void;
-  drawRoute: () => void;
-  travelTime: string | null;
   location: {
     lat: number;
     lon: number;
   };
   map: mapboxgl.Map;
 }) => {
+  const { state ,dispatch} = useCategory();
+  const [travelTime, setTravelTime] = useState<string | null>(null)
+  if (!state.selectedPlace) {
+    return;
+  }
+  const place = state.selectedPlace;
   const haversineDistance = (
     lat1: number,
     lon1: number,
     lat2: number,
     lon2: number
   ) => {
-    const R = 6371; // Yer radiusi (km)
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
@@ -53,16 +58,50 @@ export const SelectedPlaceInfo = ({
   const distance = haversineDistance(
     location.lat,
     location.lon,
-    place.lat,
-    place.lon
+    state.selectedPlace.lat,
+    state.selectedPlace.lon
   );
-  console.log(distance.toString().slice(0, 4));
 
   return (
     <>
-      {opened && (
-        <div className="h-auto w-full sm:w-96  z-50 absolute bottom-[env(safe-area-inset-bottom)]  left-0 p-5 py-6">
-          <Stack gap={10} className="bg-white p-4 mb-5 rounded-md relative">
+      <div className="h-auto w-full sm:w-96  z-50 absolute bottom-[env(safe-area-inset-bottom)]  left-0 p-5 py-6">
+        {!opened && (
+          <Stack>
+            <ActionIcon
+              size={35}
+              variant="filled"
+              color="red"
+              onClick={() => {
+                console.log("🔄 Refresh tugmachasi bosildi!");
+
+                if (map.getSource("route")) {
+                  if (map.getLayer("route")) {
+                    console.log("🗑️ Marshrut xaritadan o‘chirildi!");
+                    map.removeLayer("route");
+                  }
+                  map.removeSource("route");
+                }
+
+                dispatch({ type: "SET_SELECTED_PLACE", payload: null });
+                setTravelTime(null);
+              }}
+            >
+              <IconRefresh />
+            </ActionIcon>
+
+            <ActionIcon size={35} variant="filled" onClick={open}>
+              <IconInfoCircle />
+            </ActionIcon>
+          </Stack>
+        )}
+        {opened && (
+          <Stack
+            gap={10}
+            className="bg-white p-4 mb-5 rounded-md relative"
+            style={{ overflow: opened ? "auto" : "hidden" }}
+            w={opened ? "100%" : "auto"}
+            // className="overflow-hidden"
+          >
             {travelTime && (
               <Group
                 justify="space-between"
@@ -76,11 +115,19 @@ export const SelectedPlaceInfo = ({
               </Group>
             )}
             <Group justify="space-between" wrap="nowrap" align="start">
-              <p className="text-xl font-bold">{place.name || "No name"} </p>{" "}
-              <ActionIcon variant="transparent" color="#000" onClick={close}>
-                <IconX />
-              </ActionIcon>
+              <p className="text-xl font-bold">{place.name || "No name"} </p>
+              {opened && (
+                <ActionIcon variant="transparent" color="#000" onClick={close}>
+                  <IconX />
+                </ActionIcon>
+              )}
+              {!opened && (
+                <ActionIcon variant="transparent" color="#000" onClick={open}>
+                  <IconInfoCircle />
+                </ActionIcon>
+              )}
             </Group>
+
             <Group justify="space-between" align="center" wrap="nowrap">
               <p>Category: </p>
               {place.category ? (
@@ -132,7 +179,15 @@ export const SelectedPlaceInfo = ({
 
             <Divider my={15} />
             <Group justify="space-between" wrap="nowrap">
-              <Button fullWidth onClick={drawRoute}>
+              <Button
+                fullWidth
+                onClick={() => {
+                  if (state.selectedPlace) {
+                    drawRoute({ map, state, setTravelTime, location });
+                  }
+                  close();
+                }}
+              >
                 Draw Route
               </Button>
               <Button
@@ -143,14 +198,15 @@ export const SelectedPlaceInfo = ({
                     zoom: 18,
                     essential: true,
                   });
+                  close();
                 }}
               >
                 Location
               </Button>
             </Group>
           </Stack>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 };

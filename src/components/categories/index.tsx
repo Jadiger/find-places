@@ -1,16 +1,23 @@
-
 import { Button, Center, Group, Loader } from "@mantine/core";
 import { useEffect, useState } from "react";
-import {  SetCategory } from "./set-category";
+import { SetCategory } from "./set-category";
 import { useDisclosure } from "@mantine/hooks";
-import { IconCategory, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
-
+import {
+  IconCategory,
+  IconChevronDown,
+  IconChevronUp,
+} from "@tabler/icons-react";
+import { useCategory } from "../../context-reducer/context";
 
 export const Categories = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
+
   const [opened, { open, close }] = useDisclosure(false);
+
+  const { state } = useCategory();
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -28,8 +35,6 @@ export const Categories = () => {
     }
   }, []);
 
-  
-
   return (
     <>
       {!location && (
@@ -43,7 +48,9 @@ export const Categories = () => {
           style={{ transform: "translateY(calc(100% + 20px))" }}
         >
           <Button
-          
+            w={180}
+            px={10}
+            py={5}
             onClick={() => {
               if (opened) {
                 close();
@@ -52,18 +59,53 @@ export const Categories = () => {
               }
             }}
           >
-            <Group justify="space-between">
-              <Group wrap="nowrap" gap={8}>
-                <IconCategory /> <p>Categories</p>
+            <Group
+              justify="space-between"
+              align="center"
+              wrap="nowrap"
+              w={150}
+            >
+              <Group
+              className=" grow-1"
+                wrap="nowrap"
+                gap={8}
+                style={{ flexShrink: 1, minWidth: 0 }}
+              >
+                <IconCategory />
+                <p
+                  style={{
+                    flexShrink : 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    margin: 0,
+                  }}
+                >
+                  {state.selectedCategory
+                    ? state.selectedCategory.label
+                    : "Categories"}
+                </p>
               </Group>
-              {opened && <IconChevronDown size={20}/>}
-              {!opened && <IconChevronUp size={20}/>}
+              <div className="shrink-0">
+                {opened ? (
+                  <IconChevronDown size={20} />
+                ) : (
+                  <IconChevronUp size={20} />
+                )}
+              </div>
             </Group>
           </Button>
-          {opened && <SetCategory lat={location.lat} lng={location.lng} close={close}/>}
+
+          {
+            <SetCategory
+              lat={location.lat}
+              lng={location.lng}
+              close={close}
+              opened={opened}
+            />
+          }
         </div>
       )}
     </>
   );
 };
-

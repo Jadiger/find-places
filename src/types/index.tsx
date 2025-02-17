@@ -37,10 +37,11 @@ export interface IRoute {
   type: string;
 }
 
-export interface SelectedCategory {
+export interface SelectedCategory  {
   label: string;
   value: string;
 }
+
 export type TransportMode = string;
 
 export interface State {
@@ -49,10 +50,12 @@ export interface State {
   transportMode: string;
   radius: number;
   zoom: number;
+  selectedPlace : Place | null
 }
 export type Action =
   | { type: "SET_CATEGORIES"; payload: SelectedCategory[] }
   | { type: "SET_CATEGORY"; payload: SelectedCategory }
   | { type: "SET_TRANSPORT_TYPE"; payload: TransportMode }
   | { type: "SET_RADIUS"; payload: number }
-  | { type: "SET_ZOOM"; payload: number };
+  | { type: "SET_ZOOM"; payload: number }
+  | {type : 'SET_SELECTED_PLACE', payload : Place | null}
