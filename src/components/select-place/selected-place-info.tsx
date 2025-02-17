@@ -7,7 +7,7 @@ import {
   Stack,
 } from "@mantine/core";
 
-import {  IconInfoCircle, IconRefresh, IconX } from "@tabler/icons-react";
+import { IconInfoCircle, IconRefresh, IconX } from "@tabler/icons-react";
 import { useCategory } from "../../context-reducer/context";
 import { drawRoute } from "./draw-route";
 import { useState } from "react";
@@ -28,8 +28,8 @@ export const SelectedPlaceInfo = ({
   };
   map: mapboxgl.Map;
 }) => {
-  const { state ,dispatch} = useCategory();
-  const [travelTime, setTravelTime] = useState<string | null>(null)
+  const { state, dispatch } = useCategory();
+  const [travelTime, setTravelTime] = useState<string | null>(null);
   if (!state.selectedPlace) {
     return;
   }
@@ -64,10 +64,7 @@ export const SelectedPlaceInfo = ({
 
   return (
     <>
-      <div
-        className="h-auto w-full sm:w-96 z-50 absolute bottom-0 left-0 p-5 py-6"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 20px)" }}
-      >
+      <div className="h-auto w-full sm:w-96 z-50 absolute bottom-0 left-0 p-5 pt-6 pb-20">
         {!opened && (
           <Stack>
             <ActionIcon
@@ -75,7 +72,6 @@ export const SelectedPlaceInfo = ({
               variant="filled"
               color="red"
               onClick={() => {
-                console.log("🔄 Refresh tugmachasi bosildi!");
 
                 if (map.getSource("route")) {
                   if (map.getLayer("route")) {
